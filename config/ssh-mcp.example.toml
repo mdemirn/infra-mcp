@@ -6,6 +6,9 @@
 approvalMode = "ask-destructive"
 commandTimeoutMs = 120000
 commandQuotaPerDay = 500
+# Local directory that sftp-upload-file / sftp-download-file may read from and write to.
+# Without it, those two tools refuse to run.
+# transferRoot = "~/infra-mcp/transfers"
 
 [[profiles]]
 name = "web01"
