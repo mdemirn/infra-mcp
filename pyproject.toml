@@ -1,0 +1,24 @@
+[project]
+name = "infra-mcp"
+version = "0.1.0"
+description = "Single MCP gateway in front of the FortiGate, vCenter, Ruijie, Windows and Linux MCP servers"
+requires-python = ">=3.12"
+# FastMCP 3.x / MCP SDK v1 on purpose: a v4 gateway lets Claude Code 2.1.308 open a
+# 2026-07-28 connection, which the handshake-only backends and ssh-mcp's approval prompts cannot serve.
+dependencies = ["fastmcp==3.4.11", "mcp<2"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+infra-mcp = "infra_mcp.gateway:main"
+
+[build-system]
+requires = ["setuptools>=70"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

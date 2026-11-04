@@ -1,0 +1,62 @@
+# infra-mcp gateway: the MCP servers behind the single "infra" entry.
+# Copy to config/gateway.toml and adjust. Tool names become <prefix>_<tool>.
+# Every call is written to the audit log. Emergency brake: read_only = true
+# (or INFRA_MCP_READ_ONLY=1) hides and blocks every write tool.
+
+[gateway]
+name = "infra"
+audit_log = "~/infra-mcp/logs/audit.jsonl"
+log_dir = "~/infra-mcp/logs"
+read_only = false
+
+# FortiGate firewalls: https://github.com/mdemirn/fortigate-mcp (stdio)
+[[backends]]
+name = "fortigate"
+prefix = "fgt"
+command = "~/fortigate-mcp/.venv/bin/python"
+args = ["-m", "src.fortigate_mcp.server"]
+cwd = "~/fortigate-mcp"
+env = { FORTIGATE_MCP_CONFIG = "~/fortigate-mcp/config/config.json" }
+
+# vCenter: https://github.com/giuliolibrando/vmware-vsphere-mcp-server, already
+# running as a streamable HTTP server on this machine.
+[[backends]]
+name = "vcenter"
+prefix = "vc"
+url = "http://127.0.0.1:8765/mcp"
+host_args = ["hostname"]
+allowed_hosts = ["vcenter.example.internal", "192.0.2.20"]
+
+# Ruijie switches over telnet: https://github.com/rmbnetlife/ruijie-cli-mcp
+[[backends]]
+name = "ruijie"
+prefix = "sw"
+command = "~/ruijie-cli-mcp/.venv/bin/ruijie-cli-mcp"
+host_args = ["host"]
+allowed_hosts = ["core-switch.example.internal", "192.0.2.2"]
+
+# Windows over WinRM: https://github.com/InfraMCP/win-mcp-server
+# Its tools already start with "win_", so they are mounted without a second prefix.
+[[backends]]
+name = "windows"
+prefix = "win"
+native_prefix = true
+command = "~/win-mcp-server/.venv/bin/win-mcp-server"
+host_args = ["hostname"]
+allowed_hosts = [
+  "dc01", "dc01.example.internal", "192.0.2.10",
+  "fs01", "fs01.example.internal", "192.0.2.11",
+]
+read_only_tools = ["win_get_system_info", "win_get_running_services", "win_get_disk_space"]
+
+# Linux over SSH: ssh-mcp from npm (backends/ssh-mcp), profiles in config/ssh-mcp.toml.
+[[backends]]
+name = "linux"
+prefix = "lnx"
+command = "/opt/homebrew/bin/node"
+args = ["~/infra-mcp/backends/ssh-mcp/node_modules/ssh-mcp/build/index.js", "--config=~/infra-mcp/config/ssh-mcp.toml"]
+
+# Optional per-backend keys:
+#   enabled = false            skip this backend
+#   read_only = true           hide and block this backend's write tools
+#   disabled_tools = ["..."]   original tool names that are never exposed

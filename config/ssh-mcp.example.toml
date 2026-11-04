@@ -1,0 +1,31 @@
+# ssh-mcp (tufantunc/ssh-mcp) profiles for the gateway's "lnx" backend.
+# Copy to config/ssh-mcp.toml. One dedicated account per server, key-based login.
+# sudo (privileged) and destructive commands ask for approval every time (MCP elicitation).
+
+[defaults]
+approvalMode = "ask-destructive"
+commandTimeoutMs = 120000
+commandQuotaPerDay = 500
+
+[[profiles]]
+name = "web01"
+host = "192.0.2.30"
+user = "mcp"
+auth = "key"
+keyRef = "~/.ssh/id_ed25519_mcp"
+group = "prod"
+role = "admin"
+
+[[profiles]]
+name = "db01"
+host = "192.0.2.31"
+user = "mcp"
+auth = "key"
+keyRef = "~/.ssh/id_ed25519_mcp"
+group = "prod"
+role = "admin"
+
+# What the "admin" role may run on "prod" profiles; privileged and destructive
+# commands still need approval.
+[policy.roleBindings.admin]
+prod = ["read-only", "safe", "destructive", "privileged"]

@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.DS_Store
+logs/
+backups/
+tools/
+backends/ssh-mcp/node_modules/
+# Real configuration: hosts, accounts and paths of your environment
+config/gateway.toml
+config/ssh-mcp.toml
